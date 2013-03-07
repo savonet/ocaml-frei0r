@@ -9,7 +9,11 @@ external version : unit -> int * int = "ocaml_f0r_version"
 
 type plugin
 
-let default_paths = ["/usr/lib/frei0r-1"; "/usr/local/lib/frei0r-1"; (Sys.getenv "HOME")^"/.frei0r-1/lib"]
+let default_paths = ["/usr/lib/frei0r-1"; "/usr/local/lib/frei0r-1"]
+
+let default_paths =
+  try ((Sys.getenv "HOME")^"/.frei0r-1/lib") :: default_paths
+  with Not_found -> default_paths
 
 external load : string -> plugin = "ocaml_f0r_dlopen"
 
