@@ -271,13 +271,13 @@ CAMLprim value ocaml_f0r_get_param_string(value instance, value parameter)
   plugin_t *p = Plugin_val(i->plugin);
   int param = Int_val(parameter);
   /* TODO: can we avoid buffer overflows?... */
-  f0r_param_string x[1024];
+  char val[1024];
 
   caml_release_runtime_system();
-  p->get_param_value(i->instance, x, param);
+  p->get_param_value(i->instance, val, param);
   caml_acquire_runtime_system();
 
-  CAMLreturn(caml_copy_string(x));
+  CAMLreturn(caml_copy_string(val));
 }
 
 CAMLprim value ocaml_f0r_set_param_bool(value instance, value parameter, value val)
