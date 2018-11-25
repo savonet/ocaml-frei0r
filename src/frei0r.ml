@@ -77,30 +77,59 @@ type param_info =
 
 external param_info : plugin -> int -> param_info = "ocaml_f0r_param_info"
 
-type t
+type _t
+type t = plugin * _t
 
-external create : plugin -> int -> int -> t = "ocaml_f0r_construct"
+external create : plugin -> int -> int -> _t = "ocaml_f0r_construct"
+external destruct : plugin -> _t -> unit = "ocaml_f0r_plugin_destruct"
+
+let create p w h =
+  let destruct = destruct p in
+  let t = create p w h in
+  Gc.finalise destruct t;
+  (p,t)
 
 type color = float * float * float
 type position = float * float
 
-external get_param_bool : t -> int -> bool = "ocaml_f0r_get_param_bool"
-external get_param_float : t -> int -> float = "ocaml_f0r_get_param_double"
-external get_param_color : t -> int -> color = "ocaml_f0r_get_param_color"
-external get_param_position : t -> int -> position = "ocaml_f0r_get_param_position"
-external get_param_string : t -> int -> string = "ocaml_f0r_get_param_string"
+external get_param_bool : plugin -> _t -> int -> bool = "ocaml_f0r_get_param_bool"
+let get_param_bool (p,t) = get_param_bool p t
 
-external set_param_bool : t -> int -> bool -> unit = "ocaml_f0r_set_param_bool"
-external set_param_float : t -> int -> float -> unit = "ocaml_f0r_set_param_double"
-external set_param_color : t -> int -> color -> unit = "ocaml_f0r_set_param_color"
-external set_param_position : t -> int -> position -> unit = "ocaml_f0r_set_param_position"
-external set_param_string : t -> int -> string -> unit = "ocaml_f0r_set_param_string"
+external get_param_float : plugin -> _t -> int -> float = "ocaml_f0r_get_param_double"
+let get_param_float (p,t) = get_param_float p t
+
+external get_param_color : plugin -> _t -> int -> color = "ocaml_f0r_get_param_color"
+let get_param_color (p,t) = get_param_color p t
+
+external get_param_position : plugin -> _t -> int -> position = "ocaml_f0r_get_param_position"
+let get_param_position (p,t) = get_param_position p t
+
+external get_param_string : plugin -> _t -> int -> string = "ocaml_f0r_get_param_string"
+let get_param_string (p,t) = get_param_string p t
+
+external set_param_bool : plugin -> _t -> int -> bool -> unit = "ocaml_f0r_set_param_bool"
+let set_param_bool (p,t) = set_param_bool p t
+
+external set_param_float : plugin -> _t -> int -> float -> unit = "ocaml_f0r_set_param_double"
+let set_param_float (p,t) = set_param_float p t
+
+external set_param_color : plugin -> _t -> int -> color -> unit = "ocaml_f0r_set_param_color"
+let set_param_color (p,t) = set_param_color p t
+
+external set_param_position : plugin -> _t -> int -> position -> unit = "ocaml_f0r_set_param_position"
+let set_param_position (p,t) = set_param_position p t
+
+external set_param_string : plugin -> _t -> int -> string -> unit = "ocaml_f0r_set_param_string"
+let set_param_string (p,t) = set_param_string p t 
 
 type data = (int, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t
 
-external update : t -> float -> data option -> data -> unit = "ocaml_f0r_update"
+external update : plugin -> _t -> float -> data option -> data -> unit = "ocaml_f0r_update"
+let update (p,t) = update p t
 let update0 i t = update i t None
 let update1 i t d = update i t (Some d)
-external update2 : t -> float -> data option -> data option -> data option -> data -> unit = "ocaml_f0r_update2_byte" "ocaml_f0r_update2"
+
+external update2 : plugin -> _t -> float -> data option -> data option -> data option -> data -> unit = "ocaml_f0r_update2_byte" "ocaml_f0r_update2"
+let update2 (p,t) = update2 p t
 let update3 i t d1 d2 d3 = update2 i t (Some d1) (Some d2) (Some d3)
 let update2 i t d1 d2 = update2 i t (Some d1) (Some d2) None

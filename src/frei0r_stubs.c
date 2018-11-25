@@ -141,31 +141,25 @@ CAMLprim value ocaml_f0r_param_info(value plugin, value parameter)
 
 /***** Instances *****/
 
-typedef struct {
-  value plugin;
-  f0r_instance_t instance;
-} instance_t;
-
-#define Instance_val(v) (*(instance_t**)Data_custom_val(v))
-
-static void finalize_instance(value v)
-{
-  instance_t *i = Instance_val(v);
-  plugin_t *p = Plugin_val(i->plugin);
-  p->destruct(i->instance);
-  caml_remove_global_root(&i->plugin);
-  free(i);
-}
+#define Instance_val(v) (*(f0r_instance_t**)Data_custom_val(v))
 
 static struct custom_operations instance_ops =
   {
     "ocaml_f0r_instance",
-    finalize_instance,
+    custom_finalize_default,
     custom_compare_default,
     custom_hash_default,
     custom_serialize_default,
     custom_deserialize_default
   };
+
+CAMLprim value ocaml_f0r_plugin_destruct(value plugin, value instance) {
+  CAMLparam2(plugin,instance);
+  plugin_t *p = Plugin_val(plugin);
+  f0r_instance_t *i = Instance_val(instance);
+  p->destruct(i);
+  CAMLreturn(Val_unit);
+}
 
 CAMLprim value ocaml_f0r_construct(value plugin, value width, value height)
 {
@@ -174,8 +168,7 @@ CAMLprim value ocaml_f0r_construct(value plugin, value width, value height)
   plugin_t *p = Plugin_val(plugin);
   int w = Int_val(width);
   int h = Int_val(height);
-  f0r_instance_t instance;
-  instance_t *i;
+  f0r_instance_t *instance;
 
   caml_release_runtime_system();
   instance = p->construct(w,h);
@@ -183,57 +176,52 @@ CAMLprim value ocaml_f0r_construct(value plugin, value width, value height)
 
   if (!instance) caml_raise_constant(*caml_named_value("f0r_exn_failure"));
 
-  i = malloc(sizeof(instance_t));
-  i->plugin = plugin;
-  caml_register_global_root(&i->plugin);
-  i->instance = instance;
-
-  ans = caml_alloc_custom(&instance_ops, sizeof(instance_t*), 0, 1);
-  Instance_val(ans) = i;
+  ans = caml_alloc_custom(&instance_ops, sizeof(f0r_instance_t*), 0, 1);
+  Instance_val(ans) = instance;
   CAMLreturn(ans);
 }
 
-CAMLprim value ocaml_f0r_get_param_bool(value instance, value parameter)
+CAMLprim value ocaml_f0r_get_param_bool(value plugin, value instance, value parameter)
 {
-  CAMLparam2(instance, parameter);
-  instance_t *i = Instance_val(instance);
-  plugin_t *p = Plugin_val(i->plugin);
+  CAMLparam3(plugin, instance, parameter);
+  f0r_instance_t *i = Instance_val(instance);
+  plugin_t *p = Plugin_val(plugin);
   int param = Int_val(parameter);
   f0r_param_bool x;
 
   caml_release_runtime_system();
-  p->get_param_value(i->instance, &x, param);
+  p->get_param_value(i, &x, param);
   caml_acquire_runtime_system();
 
   CAMLreturn(Val_bool(x>=0.5));
 }
 
-CAMLprim value ocaml_f0r_get_param_double(value instance, value parameter)
+CAMLprim value ocaml_f0r_get_param_double(value plugin, value instance, value parameter)
 {
-  CAMLparam2(instance, parameter);
-  instance_t *i = Instance_val(instance);
-  plugin_t *p = Plugin_val(i->plugin);
+  CAMLparam3(plugin, instance, parameter);
+  f0r_instance_t *i = Instance_val(instance);
+  plugin_t *p = Plugin_val(plugin);
   int param = Int_val(parameter);
   f0r_param_double x;
 
   caml_release_runtime_system();
-  p->get_param_value(i->instance, &x, param);
+  p->get_param_value(i, &x, param);
   caml_acquire_runtime_system();
 
   CAMLreturn(caml_copy_double(x));
 }
 
-CAMLprim value ocaml_f0r_get_param_color(value instance, value parameter)
+CAMLprim value ocaml_f0r_get_param_color(value plugin, value instance, value parameter)
 {
-  CAMLparam2(instance, parameter);
+  CAMLparam3(plugin, instance, parameter);
   CAMLlocal1(ans);
-  instance_t *i = Instance_val(instance);
-  plugin_t *p = Plugin_val(i->plugin);
+  f0r_instance_t *i = Instance_val(instance);
+  plugin_t *p = Plugin_val(plugin);
   int param = Int_val(parameter);
   f0r_param_color_t x;
 
   caml_release_runtime_system();
-  p->get_param_value(i->instance, &x, param);
+  p->get_param_value(i, &x, param);
   caml_acquire_runtime_system();
 
   ans = caml_alloc_tuple(3);
@@ -244,17 +232,17 @@ CAMLprim value ocaml_f0r_get_param_color(value instance, value parameter)
   CAMLreturn(ans);
 }
 
-CAMLprim value ocaml_f0r_get_param_position(value instance, value parameter)
+CAMLprim value ocaml_f0r_get_param_position(value plugin, value instance, value parameter)
 {
-  CAMLparam2(instance, parameter);
+  CAMLparam3(plugin, instance, parameter);
   CAMLlocal1(ans);
-  instance_t *i = Instance_val(instance);
-  plugin_t *p = Plugin_val(i->plugin);
+  f0r_instance_t *i = Instance_val(instance);
+  plugin_t *p = Plugin_val(plugin);
   int param = Int_val(parameter);
   f0r_param_position_t x;
 
   caml_release_runtime_system();
-  p->get_param_value(i->instance, &x, param);
+  p->get_param_value(i, &x, param);
   caml_acquire_runtime_system();
 
   ans = caml_alloc_tuple(2);
@@ -264,57 +252,57 @@ CAMLprim value ocaml_f0r_get_param_position(value instance, value parameter)
   CAMLreturn(ans);
 }
 
-CAMLprim value ocaml_f0r_get_param_string(value instance, value parameter)
+CAMLprim value ocaml_f0r_get_param_string(value plugin, value instance, value parameter)
 {
-  CAMLparam2(instance, parameter);
-  instance_t *i = Instance_val(instance);
-  plugin_t *p = Plugin_val(i->plugin);
+  CAMLparam3(plugin, instance, parameter);
+  f0r_instance_t *i = Instance_val(instance);
+  plugin_t *p = Plugin_val(plugin);
   int param = Int_val(parameter);
   /* TODO: can we avoid buffer overflows?... */
   char val[1024];
 
   caml_release_runtime_system();
-  p->get_param_value(i->instance, val, param);
+  p->get_param_value(i, val, param);
   caml_acquire_runtime_system();
 
   CAMLreturn(caml_copy_string(val));
 }
 
-CAMLprim value ocaml_f0r_set_param_bool(value instance, value parameter, value val)
+CAMLprim value ocaml_f0r_set_param_bool(value plugin, value instance, value parameter, value val)
 {
-  CAMLparam3(instance, parameter, val);
-  instance_t *i = Instance_val(instance);
-  plugin_t *p = Plugin_val(i->plugin);
+  CAMLparam4(plugin, instance, parameter, val);
+  f0r_instance_t *i = Instance_val(instance);
+  plugin_t *p = Plugin_val(plugin);
   int param = Int_val(parameter);
   f0r_param_bool x = Bool_val(val)?1.:0.;
 
   caml_release_runtime_system();
-  p->set_param_value(i->instance, &x, param);
+  p->set_param_value(i, &x, param);
   caml_acquire_runtime_system();
 
   CAMLreturn(Val_unit);
 }
 
-CAMLprim value ocaml_f0r_set_param_double(value instance, value parameter, value val)
+CAMLprim value ocaml_f0r_set_param_double(value plugin, value instance, value parameter, value val)
 {
-  CAMLparam3(instance, parameter, val);
-  instance_t *i = Instance_val(instance);
-  plugin_t *p = Plugin_val(i->plugin);
+  CAMLparam4(plugin, instance, parameter, val);
+  f0r_instance_t *i = Instance_val(instance);
+  plugin_t *p = Plugin_val(plugin);
   int param = Int_val(parameter);
   f0r_param_double x = Double_val(val);
 
   caml_release_runtime_system();
-  p->set_param_value(i->instance, &x, param);
+  p->set_param_value(i, &x, param);
   caml_acquire_runtime_system();
 
   CAMLreturn(Val_unit);
 }
 
-CAMLprim value ocaml_f0r_set_param_color(value instance, value parameter, value val)
+CAMLprim value ocaml_f0r_set_param_color(value plugin, value instance, value parameter, value val)
 {
-  CAMLparam3(instance, parameter, val);
-  instance_t *i = Instance_val(instance);
-  plugin_t *p = Plugin_val(i->plugin);
+  CAMLparam4(plugin, instance, parameter, val);
+  f0r_instance_t *i = Instance_val(instance);
+  plugin_t *p = Plugin_val(plugin);
   int param = Int_val(parameter);
   f0r_param_color_t c;
 
@@ -323,17 +311,17 @@ CAMLprim value ocaml_f0r_set_param_color(value instance, value parameter, value 
   c.b = Double_val(Field(val,2));
 
   caml_release_runtime_system();
-  p->set_param_value(i->instance, &c, param);
+  p->set_param_value(i, &c, param);
   caml_acquire_runtime_system();
 
   CAMLreturn(Val_unit);
 }
 
-CAMLprim value ocaml_f0r_set_param_position(value instance, value parameter, value val)
+CAMLprim value ocaml_f0r_set_param_position(value plugin, value instance, value parameter, value val)
 {
-  CAMLparam3(instance, parameter, val);
-  instance_t *i = Instance_val(instance);
-  plugin_t *p = Plugin_val(i->plugin);
+  CAMLparam4(plugin, instance, parameter, val);
+  f0r_instance_t *i = Instance_val(instance);
+  plugin_t *p = Plugin_val(plugin);
   int param = Int_val(parameter);
   f0r_param_position_t pos;
 
@@ -341,29 +329,29 @@ CAMLprim value ocaml_f0r_set_param_position(value instance, value parameter, val
   pos.y = Double_val(Field(val,1));
 
   caml_release_runtime_system();
-  p->set_param_value(i->instance, &pos, param);
+  p->set_param_value(i, &pos, param);
   caml_acquire_runtime_system();
 
   CAMLreturn(Val_unit);
 }
 
-CAMLprim value ocaml_f0r_set_param_string(value instance, value parameter, value val)
+CAMLprim value ocaml_f0r_set_param_string(value plugin, value instance, value parameter, value val)
 {
-  CAMLparam3(instance, parameter, val);
-  instance_t *i = Instance_val(instance);
-  plugin_t *p = Plugin_val(i->plugin);
+  CAMLparam4(plugin, instance, parameter, val);
+  f0r_instance_t *i = Instance_val(instance);
+  plugin_t *p = Plugin_val(plugin);
   int param = Int_val(parameter);
 
-  p->set_param_value(i->instance, String_val(val), param);
+  p->set_param_value(i, String_val(val), param);
 
   CAMLreturn(Val_unit);
 }
 
-CAMLprim value ocaml_f0r_update(value instance, value time, value inframe, value outframe)
+CAMLprim value ocaml_f0r_update(value plugin, value instance, value time, value inframe, value outframe)
 {
-  CAMLparam4(instance, time, inframe, outframe);
-  instance_t *i = Instance_val(instance);
-  plugin_t *p = Plugin_val(i->plugin);
+  CAMLparam5(plugin, instance, time, inframe, outframe);
+  f0r_instance_t *i = Instance_val(instance);
+  plugin_t *p = Plugin_val(plugin);
   double t = Double_val(time);
   const uint32_t *in;
   uint32_t *out = Caml_ba_data_val(outframe);
@@ -375,20 +363,20 @@ CAMLprim value ocaml_f0r_update(value instance, value time, value inframe, value
 
   caml_release_runtime_system();
   if (p->update)
-    p->update(i->instance, t, in, out);
+    p->update(i, t, in, out);
   else
-    p->update2(i->instance, t, in, NULL, NULL, out);
+    p->update2(i, t, in, NULL, NULL, out);
   caml_acquire_runtime_system();
 
   CAMLreturn(Val_unit);
 }
 
-CAMLprim value ocaml_f0r_update2(value instance, value time, value inframe1, value inframe2, value inframe3, value outframe)
+CAMLprim value ocaml_f0r_update2(value plugin, value instance, value time, value inframe1, value inframe2, value inframe3, value outframe)
 {
-  CAMLparam5(instance, time, inframe1, inframe2, inframe3);
-  CAMLxparam1(outframe);
-  instance_t *i = Instance_val(instance);
-  plugin_t *p = Plugin_val(i->plugin);
+  CAMLparam5(plugin, instance, time, inframe1, inframe2);
+  CAMLxparam2(inframe3, outframe);
+  f0r_instance_t *i = Instance_val(instance);
+  plugin_t *p = Plugin_val(plugin);
   double t = Double_val(time);
   const uint32_t *in1, *in2, *in3;
   uint32_t *out = Caml_ba_data_val(outframe);
@@ -398,7 +386,7 @@ CAMLprim value ocaml_f0r_update2(value instance, value time, value inframe1, val
   in3 = Is_block(inframe3)?Caml_ba_data_val(Field(inframe3,0)):NULL;
 
   caml_release_runtime_system();
-  p->update2(i->instance, t, in1, in2, in3, out);
+  p->update2(i, t, in1, in2, in3, out);
   caml_acquire_runtime_system();
 
   CAMLreturn(Val_unit);
@@ -406,5 +394,5 @@ CAMLprim value ocaml_f0r_update2(value instance, value time, value inframe1, val
 
 CAMLprim value ocaml_f0r_update2_byte(value* argv, int argn)
 {
-  return ocaml_f0r_update2(argv[0],argv[1],argv[2],argv[3],argv[4],argv[5]);
+  return ocaml_f0r_update2(argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6]);
 }

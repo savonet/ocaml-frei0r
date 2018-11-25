@@ -1,3 +1,7 @@
+0.1.2 ()
+=====
+* Changed internal bindings to avoid using global roots.
+
 0.1.1 (03-08-2015)
 =====
 * Dummy github release.

@@ -12,6 +12,7 @@ src/Makefile
 src/._bcdi/
 src/._d/
 examples/._d/
+examples/frei0r_test
 src/._ncdi/
 *.a
 *.cm*
