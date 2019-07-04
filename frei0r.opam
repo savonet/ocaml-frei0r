@@ -1,23 +1,27 @@
 opam-version: "2.0"
-version: "dev"
+name: "frei0r"
+version: "0.1.2"
 maintainer: "Romain Beauxis <toots@rastageeks.org>"
 authors: "The Savonet Team <savonet-users@lists.sourceforge.net>"
 homepage: "https://github.com/savonet/ocaml-frei0r"
 bug-reports: "https://github.com/savonet/ocaml-frei0r/issues"
-depends: ["ocaml" "ocamlfind"]
-flags: light-uninstall
+synopsis: "Bindings for the frei0r API which provides video effects"
+depends: [
+  "ocaml"
+  "ocamlfind" {build}
+]
 build: [
-  ["./bootstrap"]
+  ["./bootstrap"] {pinned}
   ["./configure" "--prefix" prefix]
-  [make "clean"]
+  [make "clean"] {pinned}
   [make]
 ]
 install: [make "install"]
-remove: ["ocamlfind" "remove" "frei0r"]
 depexts: [
+  ["frei0r-plugins-dev"] {os-distribution = "alpine"}
   ["frei0r-devel"] {os-distribution = "centos"}
   ["frei0r-devel"] {os-distribution = "fedora"}
-  ["frei0r-devel"] {os-distribution = "opensuse"}
+  ["frei0r-devel"] {os-family = "suse"}
   ["frei0r"] {os = "macos" & os-distribution = "homebrew"}
   ["frei0r-plugins-dev"] {os-distribution = "debian"}
   ["frei0r-plugins-dev"] {os-distribution = "ubuntu"}
