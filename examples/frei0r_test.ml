@@ -29,7 +29,7 @@ let () =
       | End_of_file -> Unix.closedir d
     with
     | Unix.Unix_error (e,_,_) ->
-      Printf.eprintf "Error while loading directory %s: %s"
+      Printf.eprintf "Error while loading directory %s: %s\n"
         dir (Unix.error_message e)
   in
   List.iter test_plugin_dir Frei0r.default_paths;
