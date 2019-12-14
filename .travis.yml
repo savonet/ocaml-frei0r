@@ -4,9 +4,9 @@ addons:
     packages:
     - ocaml-nox
     - ocaml-findlib
+    - frei0r-plugins-dev
 
-before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -y frei0r-plugins-dev
-
-script: ./bootstrap && ./configure && make
+script:
+  - ./bootstrap
+  - ./configure
+  - make
