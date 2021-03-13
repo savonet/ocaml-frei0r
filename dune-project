@@ -12,7 +12,7 @@
  (name frei0r)
  (synopsis "Bindings for the frei0r API which provides video effects")
  (depends
-  conf-libfrei0r
+  conf-frei0r
   conf-pkg-config
   (dune (>= 2.0))
   dune-configurator)
