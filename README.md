@@ -9,7 +9,7 @@ Prerequisites:
 ==============
 
 - ocaml
-- libfrei0r
+- frei0r
 - findlib
 - dune >= 2.0
 
