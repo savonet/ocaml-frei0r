@@ -1,6 +1,0 @@
-name="frei0r"
-version="@VERSION@"
-description="OCaml bindings for the frei0r API"
-requires="@requires@"
-archive(byte)="frei0r.cma"
-archive(native)="frei0r.cmxa"

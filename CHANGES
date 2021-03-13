@@ -1,6 +1,7 @@
-0.1.2 ()
+0.1.2 (unreleased)
 =====
 * Changed internal bindings to avoid using global roots.
+* Switch to dune!
 
 0.1.1 (03-08-2015)
 =====
