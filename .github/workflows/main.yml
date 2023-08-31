@@ -15,5 +15,3 @@ jobs:
     - run: opam install . --deps-only --with-test
     - run: opam exec -- dune build
     - run: opam exec -- dune runtest
-    - name: Deploy odoc to GitHub Pages
-      uses: ocaml/setup-ocaml/deploy-doc@v2
