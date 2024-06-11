@@ -35,5 +35,9 @@ let () =
       Printf.eprintf "Error while loading directory %s: %s\n" dir
         (Unix.error_message e)
   in
-  List.iter test_plugin_dir Frei0r.default_paths;
+  let paths =
+    if Array.length Sys.argv > 1 then List.tl (Array.to_list Sys.argv)
+    else Frei0r.default_paths
+  in
+  List.iter test_plugin_dir paths;
   Gc.full_major ()
