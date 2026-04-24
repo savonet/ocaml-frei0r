@@ -132,22 +132,22 @@ CAMLprim value ocaml_f0r_plugin_info(value plugin) {
   CAMLparam1(plugin);
   CAMLlocal1(ans);
   plugin_t *p = Plugin_val(plugin);
-  f0r_plugin_info_t info;
+  f0r_plugin_info_t info = {0};
 
   caml_release_runtime_system();
   p->get_plugin_info(&info);
   caml_acquire_runtime_system();
 
   ans = caml_alloc_tuple(9);
-  Store_field(ans, 0, caml_copy_string(info.name));
-  Store_field(ans, 1, caml_copy_string(info.author));
+  Store_field(ans, 0, caml_copy_string(info.name ? info.name : ""));
+  Store_field(ans, 1, caml_copy_string(info.author ? info.author : ""));
   Store_field(ans, 2, Val_int(info.plugin_type));
   Store_field(ans, 3, Val_int(info.color_model));
   Store_field(ans, 4, Val_int(info.frei0r_version));
   Store_field(ans, 5, Val_int(info.major_version));
   Store_field(ans, 6, Val_int(info.minor_version));
   Store_field(ans, 7, Val_int(info.num_params));
-  Store_field(ans, 8, caml_copy_string(info.explanation));
+  Store_field(ans, 8, caml_copy_string(info.explanation ? info.explanation : ""));
 
   CAMLreturn(ans);
 }
@@ -157,16 +157,16 @@ CAMLprim value ocaml_f0r_param_info(value plugin, value parameter) {
   CAMLlocal1(ans);
   plugin_t *p = Plugin_val(plugin);
   int param = Int_val(parameter);
-  f0r_param_info_t info;
+  f0r_param_info_t info = {0};
 
   caml_release_runtime_system();
   p->get_param_info(&info, param);
   caml_acquire_runtime_system();
 
   ans = caml_alloc_tuple(3);
-  Store_field(ans, 0, caml_copy_string(info.name));
+  Store_field(ans, 0, caml_copy_string(info.name ? info.name : ""));
   Store_field(ans, 1, Val_int(info.type));
-  Store_field(ans, 2, caml_copy_string(info.explanation));
+  Store_field(ans, 2, caml_copy_string(info.explanation ? info.explanation : ""));
 
   CAMLreturn(ans);
 }
