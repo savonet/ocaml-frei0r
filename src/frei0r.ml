@@ -15,6 +15,11 @@ let default_paths =
   try (Sys.getenv "HOME" ^ "/.frei0r-1/lib") :: default_paths
   with Not_found -> default_paths
 
+let default_paths =
+  match Sys.getenv_opt "FREI0R_PATH" with
+    | None -> default_paths
+    | Some path -> String.split_on_char ':' path @ default_paths
+
 external load : string -> plugin = "ocaml_f0r_dlopen"
 
 type plugin_type = Filter | Source | Mixer2 | Mixer3

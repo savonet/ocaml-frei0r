@@ -8,13 +8,13 @@ license: "LGPL-2.1-or-later"
 homepage: "https://github.com/savonet/ocaml-frei0r"
 bug-reports: "https://github.com/savonet/ocaml-frei0r/issues"
 depends: [
+  "dune" {>= "3.23"}
   "conf-frei0r"
   "conf-pkg-config"
-  "dune" {>= "2.0"}
   "dune-configurator"
+  "odoc" {with-doc}
 ]
 build: [
-  ["dune" "subst"] {pinned}
   [
     "dune"
     "build"
@@ -28,3 +28,4 @@ build: [
   ]
 ]
 dev-repo: "git+https://github.com/savonet/ocaml-frei0r.git"
+x-maintenance-intent: ["(latest)"]

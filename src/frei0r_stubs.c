@@ -147,7 +147,8 @@ CAMLprim value ocaml_f0r_plugin_info(value plugin) {
   Store_field(ans, 5, Val_int(info.major_version));
   Store_field(ans, 6, Val_int(info.minor_version));
   Store_field(ans, 7, Val_int(info.num_params));
-  Store_field(ans, 8, caml_copy_string(info.explanation ? info.explanation : ""));
+  Store_field(ans, 8,
+              caml_copy_string(info.explanation ? info.explanation : ""));
 
   CAMLreturn(ans);
 }
@@ -166,7 +167,8 @@ CAMLprim value ocaml_f0r_param_info(value plugin, value parameter) {
   ans = caml_alloc_tuple(3);
   Store_field(ans, 0, caml_copy_string(info.name ? info.name : ""));
   Store_field(ans, 1, Val_int(info.type));
-  Store_field(ans, 2, caml_copy_string(info.explanation ? info.explanation : ""));
+  Store_field(ans, 2,
+              caml_copy_string(info.explanation ? info.explanation : ""));
 
   CAMLreturn(ans);
 }

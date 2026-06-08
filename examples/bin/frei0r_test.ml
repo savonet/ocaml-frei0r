@@ -22,18 +22,22 @@ let () =
     done;
     Printf.printf "\n"
   in
+  let try_test_plugin fname =
+    try test_plugin fname
+    with exn ->
+      Printf.eprintf "Skipping %s: %s\n" fname (Printexc.to_string exn)
+  in
   let test_plugin_dir dir =
     try
       let d = Unix.opendir dir in
-      try
-        while true do
-          let f = Unix.readdir d in
-          if f <> "." && f <> ".." then test_plugin (dir ^ "/" ^ f)
-        done
-      with End_of_file -> Unix.closedir d
-    with Unix.Unix_error (e, _, _) ->
-      Printf.eprintf "Error while loading directory %s: %s\n" dir
-        (Unix.error_message e)
+      (try
+         while true do
+           let f = Unix.readdir d in
+           if f <> "." && f <> ".." then try_test_plugin (dir ^ "/" ^ f)
+         done
+       with End_of_file -> ());
+      Unix.closedir d
+    with Unix.Unix_error (Unix.ENOENT, _, _) -> ()
   in
   let paths =
     if Array.length Sys.argv > 1 then List.tl (Array.to_list Sys.argv)

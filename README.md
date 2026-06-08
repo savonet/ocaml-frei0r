@@ -1,30 +1,21 @@
-ocaml-frei0r
-============
+# ocaml-frei0r
 
-This package contains an OCaml interface for the `frei0r` library
+> [!WARNING]
+> This repository is read-only. All changes must be made in
+> [savonet/liquidsoap](https://github.com/savonet/liquidsoap) under
+> `src/modules/synced/frei0r/` and will be mirrored here automatically.
+
+OCaml bindings for [frei0r](https://frei0r.dyne.org/), a minimalistic plugin API for video effects.
 
 Please read the COPYING file before using this software.
 
-Prerequisites:
-==============
+## Prerequisites
 
-- ocaml
-- frei0r
-- findlib
-- dune >= 2.0
+- OCaml >= 4.14
+- frei0r (e.g. `apt install frei0r-plugins-dev` or `brew install frei0r`)
+- dune >= 3.0
 
-Compilation:
-============
-
-```
-$ dune build
-```
-
-This should build both the native and the byte-code version of the
-extension library.
-
-Installation:
-=============
+## Installation
 
 Via `opam`:
 
@@ -32,9 +23,13 @@ Via `opam`:
 $ opam install frei0r
 ```
 
-Via `dune` (for developers):
+## Building from source
+
 ```
+$ dune build
 $ dune install
 ```
 
-This should install the library file in the appropriate place.
+## Contact
+
+savonet-users@lists.sourceforge.net
